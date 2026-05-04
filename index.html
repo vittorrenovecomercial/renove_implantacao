@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renove · Ficha de Implantação</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --brand: #1A2E2A;
+    --brand-mid: #2C4A44;
+    --accent: #C8A96E;
+    --accent-light: #F0E6D0;
+    --surface: #F7F5F1;
+    --surface-2: #EDEAE4;
+    --border: #D8D3CB;
+    --text: #1A1A18;
+    --text-2: #5A5850;
+    --text-3: #9A9590;
+    --white: #FFFFFF;
+    --danger: #C0392B;
+    --success: #1E7E5A;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--brand);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding: 0 0 24px;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 8px;
+  }
+
+  .sidebar-logo .wordmark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+
+  .sidebar-logo .sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    padding: 16px 24px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 2px solid transparent;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+
+  .nav-item.active {
+    background: rgba(200,169,110,0.12);
+    border-left-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .nav-item .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .nav-item.done .dot { background: var(--accent); opacity: 1; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 24px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-footer p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    line-height: 1.6;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .progress-bar {
+    width: 140px;
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 40px;
+    max-width: 820px;
+    flex: 1;
+  }
+
+  .section-header {
+    margin-bottom: 28px;
+  }
+
+  .section-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .section-header p {
+    color: var(--text-2);
+    margin-top: 6px;
+    font-size: 13.5px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* FIELDS */
+  .field-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .field-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .field-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .field-grid.cols-1 { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+    letter-spacing: 0.01em;
+  }
+
+  .field label .opt {
+    font-weight: 400;
+    color: var(--text-3);
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  .field input,
+  .field select {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--brand-mid);
+    box-shadow: 0 0 0 3px rgba(44,74,68,0.08);
+  }
+
+  .field input.error { border-color: var(--danger); }
+
+  .field input::placeholder { color: var(--text-3); }
+
+  /* PILL TOGGLE */
+  .pill-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    padding: 7px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    background: var(--white);
+    color: var(--text-2);
+    transition: all 0.15s;
+    font-weight: 400;
+  }
+
+  .pill:hover { border-color: var(--brand-mid); color: var(--brand); }
+
+  .pill.active {
+    background: var(--brand);
+    color: var(--white);
+    border-color: var(--brand);
+    font-weight: 500;
+  }
+
+  /* CONDITIONAL FIELD */
+  .conditional {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .conditional.open {
+    max-height: 200px;
+    opacity: 1;
+  }
+
+  /* STEPS NAV */
+  .step-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-bottom: 60px;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-2);
+  }
+
+  .btn-outline:hover { border-color: var(--brand); color: var(--brand); }
+
+  .btn-primary {
+    background: var(--brand);
+    color: var(--white);
+  }
+
+  .btn-primary:hover { background: var(--brand-mid); }
+
+  .btn-accent {
+    background: var(--accent);
+    color: var(--white);
+    border-color: var(--accent);
+  }
+
+  .btn-accent:hover { filter: brightness(0.92); }
+
+  .btn-clickup {
+    background: #7B68EE;
+    color: var(--white);
+    border-color: #7B68EE;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-clickup:hover { filter: brightness(0.9); }
+  .btn-clickup:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
+
+  .clickup-status {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    display: none;
+  }
+  .clickup-status.success {
+    display: block;
+    background: #E6F4EF;
+    color: #1E7E5A;
+    border: 1px solid #B8DDD0;
+  }
+  .clickup-status.error {
+    display: block;
+    background: #FDE8E8;
+    color: #C0392B;
+    border: 1px solid #F5C0C0;
+  }
+
+  /* VIEW STEPS */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* SUMMARY */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .summary-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+  }
+
+  .summary-item .s-label {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+  }
+
+  .summary-item .s-value {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .summary-item .s-value.empty { color: var(--text-3); font-weight: 400; font-style: italic; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--brand);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 9999;
+    border-left: 3px solid var(--accent);
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* FORM PREVIEW */
+  .form-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    white-space: pre-wrap;
+    line-height: 1.9;
+    color: var(--text-2);
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+
+  .form-preview strong { color: var(--text); font-weight: 600; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { width: 200px; }
+    .main { margin-left: 200px; }
+    .content { padding: 24px; }
+    .topbar { padding: 0 24px; }
+    .field-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .field-grid.cols-2,
+    .field-grid.cols-3 { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+
+  /* BADGE */
+  .badge-section {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-light);
+    color: #7A5A20;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="wordmark">Renove</div>
+    <div class="sub">Administração de Condomínios</div>
+  </div>
+
+  <div class="nav-label">Implantação</div>
+
+  <div class="nav-item active" id="nav-0" onclick="goStep(0)">
+    <span class="dot"></span> Dados do Contrato
+  </div>
+  <div class="nav-item" id="nav-1" onclick="goStep(1)">
+    <span class="dot"></span> Síndico e Subsíndico
+  </div>
+  <div class="nav-item" id="nav-2" onclick="goStep(2)">
+    <span class="dot"></span> Estrutura do Condomínio
+  </div>
+  <div class="nav-item" id="nav-3" onclick="goStep(3)">
+    <span class="dot"></span> Serviços e Obrigações
+  </div>
+  <div class="nav-item" id="nav-4" onclick="goStep(4)">
+    <span class="dot"></span> Revisar e Exportar
+  </div>
+
+  <div class="sidebar-footer">
+    <p>Preencha todos os campos e clique em <strong style="color:rgba(255,255,255,0.4)">"Exportar Ficha"</strong> para gerar o relatório.</p>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Nova Implantação</span>
+    <div class="topbar-actions">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-text" id="progress-text">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STEP 0: Contrato -->
+    <div class="step active" id="step-0">
+      <div class="section-header">
+        <div class="badge-section">Etapa 1 de 4</div>
+        <h2>Dados do Contrato</h2>
+        <p>Informações contratuais e financeiras da administração.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Identificação</div>
+        <div class="field-grid cols-1" style="margin-bottom:16px">
+          <div class="field">
+            <label>Nome do condomínio</label>
+            <input type="text" id="nome_cond" placeholder="Ex: Residencial Jardim das Acácias" oninput="updateProgress()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Tipo de condomínio</label>
+          <div class="pill-row" id="grp-tipo_cond">
+            <button class="pill" onclick="setPill('grp-tipo_cond','entrega',this)">🏗 Condomínio de entrega (novo)</button>
+            <button class="pill" onclick="setPill('grp-tipo_cond','troca',this)">🔄 Troca de administradora</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Vigência e valores</div>
+        <div class="field-grid cols-3" style="margin-bottom:16px">
+          <div class="field">
+            <label>Data de início</label>
+            <input type="date" id="data_inicio" oninput="updateProgress()">
+          </div>
+          <div class="field">
+            <label>Data final do contrato</label>
+            <input type="date" id="data_fim" oninput="updateProgress()">
+          </div>
+          <div class="field">
+            <label>Vencimento dos boletos</label>
+            <input type="text" id="venc_boleto" placeholder="Ex: dia 10" oninput="updateProgress()">
+          </div>
+        </div>
+        <div class="field-grid cols-2">
+          <div class="field">
+            <label>Taxa de condomínio (R$)</label>
+            <input type="text" id="taxa_cond" placeholder="R$ 0,00" oninput="maskCurrency(this);updateProgress()" value="R$ ">
+          </div>
+          <div class="field">
+            <label>Taxa de administração (R$)</label>
+            <input type="text" id="taxa_adm" placeholder="R$ 0,00" oninput="maskCurrency(this);updateProgress()" value="R$ ">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Operação financeira</div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="field">
+            <label>Quem faz os pagamentos?</label>
+            <div class="pill-row" id="grp-pagamentos">
+              <button class="pill" onclick="setPill('grp-pagamentos','Renove',this)">Renove</button>
+              <button class="pill" onclick="setPill('grp-pagamentos','Síndico',this)">Síndico</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Prestação de contas</label>
+            <div class="pill-row" id="grp-prestacao">
+              <button class="pill" onclick="setPill('grp-prestacao','D-1',this)">D-1</button>
+              <button class="pill" onclick="setPill('grp-prestacao','D-2',this)">D-2</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-primary" onclick="goStep(1)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: Síndico -->
+    <div class="step" id="step-1">
+      <div class="section-header">
+        <div class="badge-section">Etapa 2 de 4</div>
+        <h2>Síndico e Subsíndico</h2>
+        <p>Dados do responsável legal e do subsíndico, se houver.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Síndico</div>
+        <div class="field-grid cols-2" style="margin-bottom:16px">
+          <div class="field">
+            <label>Nome completo</label>
+            <input type="text" id="nome_sindico" placeholder="Nome do síndico" oninput="updateProgress()">
+          </div>
+          <div class="field">
+            <label>CPF</label>
+            <input type="text" id="cpf_sindico" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this);updateProgress()">
+          </div>
+        </div>
+        <div class="field-grid cols-2" style="margin-bottom:16px">
+          <div class="field">
+            <label>Contato (WhatsApp)</label>
+            <input type="text" id="contato_sindico" placeholder="(83) 00000-0000" oninput="updateProgress()">
+          </div>
+          <div class="field">
+            <label>Tipo de síndico</label>
+            <div class="pill-row" id="grp-tipo_sindico">
+              <button class="pill" onclick="setPill('grp-tipo_sindico','Profissional',this)">Profissional</button>
+              <button class="pill" onclick="setPill('grp-tipo_sindico','Orgânico',this)">Orgânico</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Subsíndico <span style="font-size:10px;font-weight:400;color:var(--text-3);margin-left:6px">(opcional)</span></div>
+        <div class="field-grid cols-2">
+          <div class="field">
+            <label>Nome completo <span class="opt">(opcional)</span></label>
+            <input type="text" id="nome_sub" placeholder="Nome do subsíndico">
+          </div>
+          <div class="field">
+            <label>Contato <span class="opt">(opcional)</span></label>
+            <input type="text" id="contato_sub" placeholder="(83) 00000-0000">
+          </div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-outline" onclick="goStep(0)">← Voltar</button>
+        <button class="btn btn-primary" onclick="goStep(2)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Estrutura -->
+    <div class="step" id="step-2">
+      <div class="section-header">
+        <div class="badge-section">Etapa 3 de 4</div>
+        <h2>Estrutura do Condomínio</h2>
+        <p>Composição física e construtora do empreendimento.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Composição</div>
+        <div class="field-grid cols-3">
+          <div class="field">
+            <label>Qtd. de unidades</label>
+            <input type="number" id="qtd_unidades" placeholder="0" min="1" oninput="updateProgress()">
+          </div>
+          <div class="field">
+            <label>Qtd. de blocos</label>
+            <input type="number" id="qtd_blocos" placeholder="0" min="1" oninput="updateProgress()">
+          </div>
+          <div class="field">
+            <label>Construtora</label>
+            <input type="text" id="construtora" placeholder="Nome da construtora" oninput="updateProgress()">
+          </div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-outline" onclick="goStep(1)">← Voltar</button>
+        <button class="btn btn-primary" onclick="goStep(3)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Serviços -->
+    <div class="step" id="step-3">
+      <div class="section-header">
+        <div class="badge-section">Etapa 4 de 4</div>
+        <h2>Serviços e Obrigações</h2>
+        <p>Configurações operacionais do condomínio.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Serviços incluídos</div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="field">
+            <label>Leitura de água e gás nos boletos?</label>
+            <div class="pill-row" id="grp-leitura">
+              <button class="pill" onclick="setPill('grp-leitura','Sim',this)">Sim</button>
+              <button class="pill" onclick="setPill('grp-leitura','Não',this)">Não</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tem certificado digital?</label>
+            <div class="pill-row" id="grp-cert">
+              <button class="pill" onclick="setPill('grp-cert','Sim',this)">Sim</button>
+              <button class="pill" onclick="setPill('grp-cert','Não',this)">Não</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Acesso na prefeitura</label>
+            <input type="text" id="prefeitura" placeholder="Login / observações">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Garantidora</div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="field">
+            <label>Tem garantidora?</label>
+            <div class="pill-row" id="grp-garantidora">
+              <button class="pill" onclick="setPill('grp-garantidora','Sim',this);toggleGarantidora('Sim')">Sim</button>
+              <button class="pill" onclick="setPill('grp-garantidora','Não',this);toggleGarantidora('Não')">Não</button>
+            </div>
+          </div>
+          <div class="conditional" id="cond-garantidora">
+            <div class="field">
+              <label>Nome da garantidora</label>
+              <input type="text" id="nome_garantidora" placeholder="Qual é a garantidora?">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Observações <span style="font-size:10px;font-weight:400;color:var(--text-3);margin-left:6px">(opcional)</span></div>
+        <div class="field">
+          <label>Observações gerais</label>
+          <textarea id="observacoes" rows="4" placeholder="Anotações livres sobre o condomínio, pendências, informações relevantes para a equipe..." style="border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px;font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--white);outline:none;resize:vertical;width:100%;transition:border-color 0.15s,box-shadow 0.15s;line-height:1.6;" onfocus="this.style.borderColor='var(--brand-mid)';this.style.boxShadow='0 0 0 3px rgba(44,74,68,0.08)'" onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'"></textarea>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-outline" onclick="goStep(2)">← Voltar</button>
+        <button class="btn btn-accent" onclick="goStep(4)">Revisar ficha →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Revisão -->
+    <div class="step" id="step-4">
+      <div class="section-header">
+        <div class="badge-section">Revisão final</div>
+        <h2>Revisar e Exportar</h2>
+        <p>Confira todos os dados antes de gerar a ficha oficial.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Contrato</div>
+        <div class="summary-grid" id="sum-contrato"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Síndico</div>
+        <div class="summary-grid" id="sum-sindico"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Estrutura</div>
+        <div class="summary-grid" id="sum-estrutura"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Serviços</div>
+        <div class="summary-grid" id="sum-servicos"></div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-outline" onclick="goStep(3)">← Voltar</button>
+        <button class="btn btn-outline" onclick="copiarFicha()">Copiar texto</button>
+        <button class="btn btn-outline" onclick="exportarExcel()">↓ Excel / Sheets</button>
+        <button class="btn btn-clickup" id="btn-clickup" onclick="enviarClickUp()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:middle;margin-right:6px"><path d="M2 9.5L7 4.5L12 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Criar tarefa no ClickUp
+        </button>
+        <button class="btn btn-primary" onclick="exportarFicha()">Exportar PDF (print)</button>
+      </div>
+      <div class="clickup-status" id="clickup-status"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // State
+  const state = {
+    pagamentos: '', prestacao: '', tipo_sindico: '', leitura: '', cert: '', garantidora: '', tipo_cond: ''
+  };
+
+  // Step navigation
+  let currentStep = 0;
+
+  function goStep(n) {
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    document.getElementById('nav-' + currentStep).classList.remove('active');
+    currentStep = n;
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('nav-' + n).classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    if (n === 4) buildSummary();
+    updateProgress();
+  }
+
+  // Pills
+  function setPill(groupId, value, btn) {
+    document.querySelectorAll('#' + groupId + ' .pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    state[groupId.replace('grp-','')] = value;
+    updateProgress();
+  }
+
+  function getPill(groupId) {
+    return state[groupId] || '';
+  }
+
+  // Conditional fields
+  function toggleGarantidora(val) {
+    const el = document.getElementById('cond-garantidora');
+    if (val === 'Sim') el.classList.add('open');
+    else el.classList.remove('open');
+  }
+
+  // CPF mask
+  function maskCPF(el) {
+    let v = el.value.replace(/\D/g, '').slice(0,11);
+    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+    el.value = v;
+  }
+
+  // Currency mask
+  function maskCurrency(el) {
+    let v = el.value.replace(/\D/g, '');
+    if (!v) { el.value = 'R$ '; return; }
+    v = (parseInt(v, 10) / 100).toFixed(2);
+    v = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    el.value = 'R$ ' + v;
+    // Move cursor to end
+    setTimeout(() => { el.selectionStart = el.selectionEnd = el.value.length; }, 0);
+  }
+
+  // Get value helper
+  function gv(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+
+  // Progress
+  function updateProgress() {
+    const fields = [
+      gv('nome_cond'), getPill('tipo_cond'), gv('data_inicio'), gv('data_fim'), gv('venc_boleto'),
+      gv('taxa_cond'), gv('taxa_adm'), getPill('pagamentos'), getPill('prestacao'),
+      gv('nome_sindico'), gv('cpf_sindico'), gv('contato_sindico'), getPill('tipo_sindico'),
+      gv('qtd_unidades'), gv('qtd_blocos'), gv('construtora'),
+      getPill('leitura'), getPill('cert'), getPill('garantidora')
+    ];
+    const filled = fields.filter(f => f !== '').length;
+    const pct = Math.round((filled / fields.length) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = pct + '%';
+    const nc = gv('nome_cond');
+    document.getElementById('topbar-title').textContent = nc ? nc : 'Nova Implantação';
+
+    // Mark nav items done
+    const stepFields = [
+      [gv('nome_cond'), getPill('tipo_cond'), gv('data_inicio'), gv('data_fim'), gv('taxa_adm'), getPill('pagamentos')],
+      [gv('nome_sindico'), gv('cpf_sindico'), getPill('tipo_sindico')],
+      [gv('qtd_unidades'), gv('construtora')],
+      [getPill('leitura'), getPill('garantidora')]
+    ];
+    stepFields.forEach((sf, i) => {
+      const done = sf.every(f => f !== '');
+      if (done) document.getElementById('nav-' + i).classList.add('done');
+      else document.getElementById('nav-' + i).classList.remove('done');
+    });
+  }
+
+  // Build summary
+  function buildSummary() {
+    const contrato = [
+      ['Nome do condomínio', gv('nome_cond')],
+      ['Tipo', getPill('tipo_cond') === 'entrega' ? 'Condomínio de entrega (novo)' : getPill('tipo_cond') === 'troca' ? 'Troca de administradora' : '—'],
+      ['Data de início', gv('data_inicio')],
+      ['Data final', gv('data_fim')],
+      ['Taxa de condomínio', gv('taxa_cond')],
+      ['Taxa de administração', gv('taxa_adm')],
+      ['Vencimento dos boletos', gv('venc_boleto')],
+      ['Pagamentos', getPill('pagamentos')],
+      ['Prestação de contas', getPill('prestacao')],
+    ];
+    const sindico = [
+      ['Nome do síndico', gv('nome_sindico')],
+      ['CPF', gv('cpf_sindico')],
+      ['Contato', gv('contato_sindico')],
+      ['Tipo', getPill('tipo_sindico')],
+      ['Nome do subsíndico', gv('nome_sub') || '—'],
+      ['Contato do subsíndico', gv('contato_sub') || '—'],
+    ];
+    const estrutura = [
+      ['Unidades', gv('qtd_unidades')],
+      ['Blocos', gv('qtd_blocos')],
+      ['Construtora', gv('construtora')],
+    ];
+    const servicos = [
+      ['Leitura água/gás', getPill('leitura')],
+      ['Certificado digital', getPill('cert')],
+      ['Acesso prefeitura', gv('prefeitura')],
+      ['Tem garantidora?', getPill('garantidora')],
+      ['Nome da garantidora', gv('nome_garantidora') || '—'],
+      ['Observações', gv('observacoes') || '—'],
+    ];
+
+    renderSummary('sum-contrato', contrato);
+    renderSummary('sum-sindico', sindico);
+    renderSummary('sum-estrutura', estrutura);
+    renderSummary('sum-servicos', servicos);
+  }
+
+  function renderSummary(id, items) {
+    const el = document.getElementById(id);
+    el.innerHTML = items.map(([label, value]) => `
+      <div class="summary-item">
+        <div class="s-label">${label}</div>
+        <div class="s-value ${value ? '' : 'empty'}">${value || 'Não preenchido'}</div>
+      </div>
+    `).join('');
+  }
+
+  // Copy to clipboard
+  function copiarFicha() {
+    const lines = [
+      '=== FICHA DE IMPLANTAÇÃO – RENOVE ===',
+      '',
+      '— CONTRATO —',
+      `Nome do condomínio: ${gv('nome_cond') || '—'}`,
+      `Data de início: ${gv('data_inicio') || '—'}`,
+      `Data final: ${gv('data_fim') || '—'}`,
+      `Taxa de condomínio: ${gv('taxa_cond') || '—'}`,
+      `Taxa de administração: ${gv('taxa_adm') || '—'}`,
+      `Vencimento dos boletos: ${gv('venc_boleto') || '—'}`,
+      `Pagamentos: ${getPill('pagamentos') || '—'}`,
+      `Prestação de contas: ${getPill('prestacao') || '—'}`,
+      '',
+      '— SÍNDICO —',
+      `Nome: ${gv('nome_sindico') || '—'}`,
+      `CPF: ${gv('cpf_sindico') || '—'}`,
+      `Contato: ${gv('contato_sindico') || '—'}`,
+      `Tipo: ${getPill('tipo_sindico') || '—'}`,
+      `Subsíndico: ${gv('nome_sub') || '—'}`,
+      `Contato subsíndico: ${gv('contato_sub') || '—'}`,
+      '',
+      '— ESTRUTURA —',
+      `Unidades: ${gv('qtd_unidades') || '—'}`,
+      `Blocos: ${gv('qtd_blocos') || '—'}`,
+      `Construtora: ${gv('construtora') || '—'}`,
+      '',
+      '— SERVIÇOS —',
+      `Leitura água/gás: ${getPill('leitura') || '—'}`,
+      `Certificado digital: ${getPill('cert') || '—'}`,
+      `Acesso prefeitura: ${gv('prefeitura') || '—'}`,
+      `Garantidora: ${getPill('garantidora') || '—'}`,
+      `Nome garantidora: ${gv('nome_garantidora') || '—'}`,
+      '',
+      '— OBSERVAÇÕES —',
+      gv('observacoes') || '—',
+    ];
+    navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('Ficha copiada com sucesso!'));
+  }
+
+  // Export / Print
+  function exportarFicha() {
+    const printCSS = `
+      <style>
+        body { font-family: Arial, sans-serif; color: #111; padding: 32px; font-size: 13px; }
+        h1 { font-size: 22px; margin-bottom: 4px; }
+        .meta { color: #666; font-size: 12px; margin-bottom: 28px; }
+        h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin: 24px 0 14px; }
+        .row { display: flex; gap: 12px; margin-bottom: 8px; }
+        .item { flex: 1; background: #f8f8f6; border: 1px solid #e0ddd8; border-radius: 6px; padding: 10px 14px; }
+        .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 2px; }
+        .val { font-size: 13px; font-weight: 600; color: #111; }
+        .val.empty { color: #aaa; font-weight: 400; }
+      </style>
+    `;
+
+    const sections = [
+      { title: 'Contrato', items: [
+        ['Data de início', gv('data_inicio')],['Data final', gv('data_fim')],
+        ['Taxa de condomínio', gv('taxa_cond')],['Taxa de administração', gv('taxa_adm')],
+        ['Vencimento dos boletos', gv('venc_boleto')],['Pagamentos', getPill('pagamentos')],
+        ['Prestação de contas', getPill('prestacao')],
+      ]},
+      { title: 'Síndico', items: [
+        ['Nome', gv('nome_sindico')],['CPF', gv('cpf_sindico')],
+        ['Contato', gv('contato_sindico')],['Tipo', getPill('tipo_sindico')],
+        ['Subsíndico', gv('nome_sub')],['Contato subsíndico', gv('contato_sub')],
+      ]},
+      { title: 'Estrutura', items: [
+        ['Unidades', gv('qtd_unidades')],['Blocos', gv('qtd_blocos')],['Construtora', gv('construtora')],
+      ]},
+      { title: 'Serviços', items: [
+        ['Leitura água/gás', getPill('leitura')],['Certificado digital', getPill('cert')],
+        ['Acesso prefeitura', gv('prefeitura')],['Garantidora', getPill('garantidora')],
+        ['Nome da garantidora', gv('nome_garantidora')],
+      ['Observações', gv('observacoes')],
+      ]},
+    ];
+
+    let body = `<h1>Ficha de Implantação – Renove</h1><p class="meta">Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</p>`;
+
+    sections.forEach(sec => {
+      body += `<h2>${sec.title}</h2>`;
+      for (let i = 0; i < sec.items.length; i += 2) {
+        body += '<div class="row">';
+        [sec.items[i], sec.items[i+1]].forEach(item => {
+          if (!item) return;
+          const [lbl, val] = item;
+          body += `<div class="item"><div class="lbl">${lbl}</div><div class="val ${val ? '' : 'empty'}">${val || '—'}</div></div>`;
+        });
+        body += '</div>';
+      }
+    });
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><title>Ficha Renove</title>${printCSS}</head><body>${body}<script>window.onload=()=>window.print();<\/script></body></html>`);
+    win.document.close();
+  }
+
+  // Export Excel (.xlsx)
+  function exportarExcel() {
+    const now = new Date();
+    const dataGeracao = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+
+    const dados = [
+      ['FICHA DE IMPLANTAÇÃO – RENOVE', ''],
+      ['Gerado em', dataGeracao],
+      ['', ''],
+      ['CONTRATO', ''],
+      ['Campo', 'Valor'],
+      ['Nome do condomínio', gv('nome_cond') || '—'],
+      ['Data de início', gv('data_inicio') || '—'],
+      ['Data final do contrato', gv('data_fim') || '—'],
+      ['Taxa de condomínio', gv('taxa_cond') || '—'],
+      ['Taxa de administração', gv('taxa_adm') || '—'],
+      ['Vencimento dos boletos', gv('venc_boleto') || '—'],
+      ['Quem faz os pagamentos', getPill('pagamentos') || '—'],
+      ['Prestação de contas', getPill('prestacao') || '—'],
+      ['', ''],
+      ['SÍNDICO', ''],
+      ['Campo', 'Valor'],
+      ['Nome do síndico', gv('nome_sindico') || '—'],
+      ['CPF do síndico', gv('cpf_sindico') || '—'],
+      ['Contato do síndico', gv('contato_sindico') || '—'],
+      ['Tipo de síndico', getPill('tipo_sindico') || '—'],
+      ['Nome do subsíndico', gv('nome_sub') || '—'],
+      ['Contato do subsíndico', gv('contato_sub') || '—'],
+      ['', ''],
+      ['ESTRUTURA DO CONDOMÍNIO', ''],
+      ['Campo', 'Valor'],
+      ['Quantidade de unidades', gv('qtd_unidades') || '—'],
+      ['Quantidade de blocos', gv('qtd_blocos') || '—'],
+      ['Construtora', gv('construtora') || '—'],
+      ['', ''],
+      ['SERVIÇOS E OBRIGAÇÕES', ''],
+      ['Campo', 'Valor'],
+      ['Leitura de água e gás no boleto', getPill('leitura') || '—'],
+      ['Certificado digital', getPill('cert') || '—'],
+      ['Acesso na prefeitura', gv('prefeitura') || '—'],
+      ['Tem garantidora', getPill('garantidora') || '—'],
+      ['Nome da garantidora', gv('nome_garantidora') || '—'],
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(dados);
+
+    // Column widths
+    ws['!cols'] = [{ wch: 36 }, { wch: 44 }];
+
+    // Style section headers (rows with single bold label)
+    const sectionRows = [0, 3, 13, 22, 29];
+    const headerRows = [4, 14, 23, 30];
+
+    sectionRows.forEach(r => {
+      const cell = ws[XLSX.utils.encode_cell({r, c: 0})];
+      if (cell) {
+        cell.s = {
+          font: { bold: true, sz: 13, color: { rgb: '1A2E2A' } },
+          fill: { fgColor: { rgb: 'F0E6D0' } },
+          alignment: { horizontal: 'left' }
+        };
+      }
+    });
+
+    headerRows.forEach(r => {
+      ['A','B'].forEach((col, ci) => {
+        const cell = ws[XLSX.utils.encode_cell({r, c: ci})];
+        if (cell) {
+          cell.s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '2C4A44' } },
+            alignment: { horizontal: 'left' }
+          };
+        }
+      });
+    });
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Implantação');
+
+    const nomeSind = gv('nome_sindico') || 'novo';
+    const filename = `Renove_Implantacao_${nomeSind.split(' ')[0]}_${now.toISOString().slice(0,10)}.xlsx`;
+    XLSX.writeFile(wb, filename);
+    showToast('Planilha Excel baixada com sucesso!');
+  }
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  updateProgress();
+
+
+  // Subtasks data
+  const SUBTASKS = {
+    entrega: [
+      "Contato/Reunião de Alinhamento com a Construtora - 10 Perguntas",
+      "Agendar no Calendário de Assembleias a Assembleia de fato",
+      "Solicitar a Construtora os cadastros dos proprietários.",
+      "Solicitar convenção Registrada",
+      "Cadastrar os proprietários no superlógica",
+      "Publicar convenção Registrada no superlógica",
+      "Cadastrar as áreas comuns passíveis de reservas",
+      "Solicitar projetos: hidráulico, elétrico, estrutural, incêndio",
+      "Informar ao IZ data da assembleia",
+      "Elaborar Planilha orçamentária",
+      "Validar planilha orçamentária com a Construtora/Síndico(a)",
+      "Informar a taxa condominial ao IZ e enviar a orçamentária",
+      "Elaborar o Edital e Ata da Assembleia fictícia",
+      "Coletar assinatura da construtora na Ata e Edital da Assembleia fictícia",
+      "Registrar Ata da Assembleia fictícia",
+      "Solicitar à construtora os termos de recebimento de chaves",
+      "Check List Evento",
+      "Abertura de CNPJ por Assembleia fictícia ou não",
+      "Abertura da conta bancária por Assembleia fictícia",
+      "Levantamento de débitos na CAGEPA",
+      "Levantamento de débitos na ENERGISA",
+      "Transferir a titularidade da matrícula na CAGEPA",
+      "Transferir a titularidade da UC da ENERGISA",
+      "Verificar a classificação do condomínio junto a ENERGISA",
+      "Elaborar o Edital de Convocação da Assembleia",
+      "Reunião prévia de Regimento Interno",
+      "Publicar Edital no superlógica e enviar via impressa para condomínio",
+      "Enviar Edital também via correio físico com AR?",
+      "Criar grupo Whatsapp Síndico(a) e Conselho",
+      "Reunião com lideranças do grupo de whatsapp da construtora",
+      "Definir/confirmar equipe da Assembleia",
+      "Preparar Assembleia/ Simular e testar equipamentos e materiais",
+      "Assembleia",
+      "Preencher formulário e enviar anexos para setor de atas",
+      "Obter ATA registrada",
+      "Abertura de CNPJ (se já não estiver aberto)",
+      "Conferir CNPJ ativo.",
+      "Solicitar certificado digital (e-CNPJ).",
+      "Criar acessos Prefeitura.",
+      "Emitir procuração no Site da Receita Federal.",
+      "Elaborar o contrato de prestação de serviços da administradora RENOVE.",
+      "Coletar as assinaturas do síndico e do representante da RENOVE via aplicativo ZAPSING.",
+      "Anexar o contrato à ata da assembleia (se aprovado em assembleia).",
+      "Digitalizar o contrato assinado.",
+      "Salvar o contrato no MEGA (pasta do condomínio > CONTRATOS)",
+      "Cadastrar Síndico e demais membros da gestão com e-mail e CPF.",
+      "Criar grupo de whatsapp dos proprietários",
+      "Criar grupo de whatsapp do Financeiro/Prestação de contas",
+      "Emitir boleto teste.",
+      "Preparar material de boas-vindas.",
+      "Fazer envio do ONBOARDING (MODELO RENOVE) para os condôminos.",
+      "Cadastrar previsão orçamentária (Financeiro > Previsão Orçamentária).",
+      "Criar acesso master do síndico (com autorização Roberto/Daniel).",
+      "Cadastrar regras das áreas comuns para reserva no GRUVI.",
+      "Definir cronograma e fluxo de vencimentos com Financeiro (Roberto/Camila Kelly).",
+      "Cadastrar funcionários no Domínio.",
+      "Criar acessos VT.",
+      "Criar acessos VA.",
+      "Criar acessos BSF.",
+      "Criar acessos Plano Odontológico.",
+      "Reconhecer firma/Assinatura digital",
+      "Protocolar na Receita Federal ou fazer a procuração via GOV.BR diretamente.",
+      "Elaborar cronograma de manutenções/licenças/seguros e etc.",
+      "Cadastrar manutenções e prazos no sistema.",
+      "Enviar Manual de Administração e Manutenções (MODELO RENOVE).",
+      "Reforçar envio do cronograma ao síndico (ANEXOII)."
+    ],
+    troca: [
+      "Elaborar o contrato de prestação de serviços da administradora RENOVE.",
+      "Coletar as assinaturas do síndico e do representante da RENOVE via aplicativo ZAPSING.",
+      "Anexar o contrato à ata da assembleia (se aprovado em assembleia).",
+      "Digitalizar o contrato assinado.",
+      "Salvar o contrato no MEGA/Superlógica (pasta do condomínio > CONTRATOS).",
+      "Elaborar e enviar (se for o caso) notificação de rescisão contratual com a ADM anterior.",
+      "Enviar também via correio físico com AR (Se necessário).",
+      "Revisar/reiterar pedido dos projetos: hidráulico, elétrico, estrutural, incêndio",
+      "Solicitar a Síndico/Adm cadastros dos proprietários.",
+      "Cadastrar os proprietários/dependentes/inquilinos/procuradores no superlógica.",
+      "Cadastrar os representantes legais com e-mail e CPF no Superlógica.",
+      "Solicitar inadimplência.",
+      "Inserir histórico de inadimplência detalhado no Superlógica.",
+      "Solicitar convenção e regimento interno.",
+      "Salvar atas, convenção, regimento interno (MEGA + Superlógica).",
+      "Criar acesso master do síndico (com autorização Roberto/Daniel).",
+      "Preparar material de boas-vindas.",
+      "Fazer envio do ONBOARDING (MODELO RENOVE) para os condôminos.",
+      "Cadastrar conta bancária.",
+      "Revisar a previsão da próxima arrecadação: taxa extra, fundo de reserva, água, energia, gás.",
+      "Cadastrar previsão orçamentária (Financeiro > Previsão Orçamentária).",
+      "Cadastrar áreas comuns para reserva no GRUVI.",
+      "Definir cronograma e fluxo de vencimentos com Financeiro (Roberto/Camila Kelly).",
+      "Levantamento de débitos na CAGEPA",
+      "Levantamento de débitos na ENERGISA",
+      "Verificar se a de titularidade na CAGEPA foi realizada.",
+      "Verificar se a de titularidade na ENERGISA foi realizada.",
+      "Verificar débitos INSS e FGTS.",
+      "Consultar pendências SERASA.",
+      "Verificar a classificação do condomínio junto a ENERGISA",
+      "Cadastrar funcionários no Domínio.",
+      "Solicitar certificado digital (e-CNPJ).",
+      "Verificar acessos VT.",
+      "Verificar acessos VA.",
+      "Verificar acessos BSF.",
+      "Verificar acessos Plano Odontológico.",
+      "Verificar acessos Prefeitura.",
+      "Emitir procuração no Site da Receita Federal.",
+      "Reconhecer firma/Assinatura digital.",
+      "Protocolar na Receita Federal ou fazer a procuração via GOV.BR diretamente.",
+      "Consultar certidões negativas federais e estaduais.",
+      "Enviar Manual de Administração e Manutenções (MODELO RENOVE).",
+      "Reforçar envio do cronograma ao síndico (ANEXOII).",
+      "Cadastrar manutenções e prazos no sistema.",
+      "Cronograma de manutenções/licenças/seguros e etc.",
+      "Cópia do AVCB",
+      "ARTs e RRTs",
+      "Manual do proprietário",
+      "Memorial descritivo",
+      "Certificados de garantia (equipamentos e sistemas)"
+    ]
+  };
+
+  async function criarSubtarefas(taskId, tipo) {
+    const lista = SUBTASKS[tipo] || [];
+    let criadas = 0;
+    for (const nome of lista) {
+      try {
+        const r = await fetch('https://api.clickup.com/api/v2/list/' + CU_LIST_ID + '/task', {
+          method: 'POST',
+          headers: { 'Authorization': CU_API_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ name: nome, parent: taskId })
+        });
+        const d = await r.json();
+        if (d.id) criadas++;
+        else console.warn('Subtarefa falhou:', nome, d);
+      } catch(e) { console.warn('Subtarefa erro:', nome, e); }
+    }
+    return criadas;
+  }
+
+  // ClickUp Integration
+  const CU_API_KEY = 'pk_82157862_VAQEVGG7CVHIPBJIMDTKSQLUQEA74TDH';
+  const CU_LIST_ID = '901313964264';
+
+  async function getListId() {
+    return CU_LIST_ID;
+  }
+
+  async function enviarClickUp() {
+    const nomeCond = gv('nome_cond');
+    if (!nomeCond) {
+      showToast('Preencha o nome do condomínio primeiro!');
+      return;
+    }
+
+    const btn = document.getElementById('btn-clickup');
+    const status = document.getElementById('clickup-status');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    status.className = 'clickup-status';
+
+    try {
+      const listId = await getListId();
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      const descricao = [
+        '📋 FICHA DE IMPLANTAÇÃO – RENOVE',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '',
+        '📅 CONTRATO',
+        `• Data de início: ${gv('data_inicio') || '—'}`,
+        `• Data final: ${gv('data_fim') || '—'}`,
+        `• Taxa de condomínio: ${gv('taxa_cond') || '—'}`,
+        `• Taxa de administração: ${gv('taxa_adm') || '—'}`,
+        `• Vencimento dos boletos: ${gv('venc_boleto') || '—'}`,
+        `• Pagamentos: ${getPill('pagamentos') || '—'}`,
+        `• Prestação de contas: ${getPill('prestacao') || '—'}`,
+        '',
+        '👤 SÍNDICO',
+        `• Nome: ${gv('nome_sindico') || '—'}`,
+        `• CPF: ${gv('cpf_sindico') || '—'}`,
+        `• Contato: ${gv('contato_sindico') || '—'}`,
+        `• Tipo: ${getPill('tipo_sindico') || '—'}`,
+        `• Subsíndico: ${gv('nome_sub') || '—'}`,
+        `• Contato subsíndico: ${gv('contato_sub') || '—'}`,
+        '',
+        '🏢 ESTRUTURA',
+        `• Unidades: ${gv('qtd_unidades') || '—'}`,
+        `• Blocos: ${gv('qtd_blocos') || '—'}`,
+        `• Construtora: ${gv('construtora') || '—'}`,
+        '',
+        '⚙️ SERVIÇOS',
+        `• Leitura água/gás: ${getPill('leitura') || '—'}`,
+        `• Certificado digital: ${getPill('cert') || '—'}`,
+        `• Acesso prefeitura: ${gv('prefeitura') || '—'}`,
+        `• Garantidora: ${getPill('garantidora') || '—'}`,
+        `• Nome garantidora: ${gv('nome_garantidora') || '—'}`,
+        '',
+        '',
+        '📝 OBSERVAÇÕES',
+        `${gv('observacoes') || '—'}`,
+        '',
+        `Gerado em ${hoje} via Sistema Renove`,
+      ].join('\n');
+
+      const payload = {
+        name: nomeCond,
+        description: descricao,
+        priority: 2
+      };
+
+      const res = await fetch('https://api.clickup.com/api/v2/list/' + listId + '/task', {
+        method: 'POST',
+        headers: {
+          'Authorization': CU_API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let data;
+      const rawText = await res.text();
+      try { data = JSON.parse(rawText); } catch(e) { throw new Error('Resposta inválida: ' + rawText.slice(0,200)); }
+
+      if (data.id) {
+        const tipoCond = getPill('tipo_cond');
+        if (tipoCond) {
+          btn.textContent = 'Criando subtarefas...';
+          const total = SUBTASKS[tipoCond] ? SUBTASKS[tipoCond].length : 0;
+          status.className = 'clickup-status success';
+          status.textContent = '✓ Tarefa criada! Adicionando ' + total + ' subtarefas...';
+          const criadas = await criarSubtarefas(data.id, tipoCond);
+          status.innerHTML = '✓ Tarefa criada com ' + criadas + ' subtarefas! <a href="' + data.url + '" target="_blank" style="color:inherit;font-weight:600;margin-left:6px">Abrir no ClickUp →</a>';
+          showToast(criadas + ' subtarefas criadas com sucesso!');
+        } else {
+          status.className = 'clickup-status success';
+          status.innerHTML = '✓ Tarefa criada no ClickUp! <a href="' + data.url + '" target="_blank" style="color:inherit;font-weight:600;margin-left:6px">Abrir no ClickUp →</a>';
+          showToast('Tarefa criada com sucesso!');
+        }
+      } else {
+        throw new Error(data.err || data.error || 'HTTP ' + res.status + ': ' + JSON.stringify(data));
+      }
+    } catch (e) {
+      status.className = 'clickup-status error';
+      status.textContent = '✗ Erro: ' + e.message;
+      showToast('Erro ao criar tarefa.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:middle;margin-right:6px"><path d="M2 9.5L7 4.5L12 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Criar tarefa no ClickUp';
+    }
+  }
+</script>
+</body>
+</html>
